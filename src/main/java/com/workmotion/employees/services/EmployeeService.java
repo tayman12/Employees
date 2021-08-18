@@ -7,6 +7,7 @@ public interface EmployeeService {
 
     Employee create(Employee employee);
 
-    Employee sendEvent(String employeeId, EmployeeEvent event) throws Exception;
+    Employee sendEventStateMachine(String employeeId, EmployeeEvent event) throws Exception;
 
+    Employee sendEventKafka(String employeeId, EmployeeEvent event) throws Exception;
 }

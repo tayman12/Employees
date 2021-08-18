@@ -4,7 +4,6 @@ import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
 import com.workmotion.employees.repositories.EmployeeRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,13 +34,13 @@ class EmployeeServiceImplTest {
 
         Employee savedEmployee = employeeService.create(employee);
 
-        employeeService.sendEvent(savedEmployee.getId(), EmployeeEvent.CHECK);
+        employeeService.sendEventStateMachine(savedEmployee.getId(), EmployeeEvent.CHECK);
         assertEquals(EmployeeState.IN_CHECK, employeeRepository.findById(savedEmployee.getId()).get().getState());
 
-        employeeService.sendEvent(savedEmployee.getId(), EmployeeEvent.APPROVE);
+        employeeService.sendEventStateMachine(savedEmployee.getId(), EmployeeEvent.APPROVE);
         assertEquals(EmployeeState.APPROVED, employeeRepository.findById(savedEmployee.getId()).get().getState());
 
-        employeeService.sendEvent(savedEmployee.getId(), EmployeeEvent.ACTIVATE);
+        employeeService.sendEventStateMachine(savedEmployee.getId(), EmployeeEvent.ACTIVATE);
         assertEquals(EmployeeState.ACTIVE, employeeRepository.findById(savedEmployee.getId()).get().getState());
     }
 }

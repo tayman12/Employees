@@ -6,6 +6,7 @@ import com.workmotion.employees.repositories.EmployeeRepository;
 import com.workmotion.employees.services.EmployeeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
@@ -19,6 +20,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EmployeeStateChangeInterceptor extends StateMachineInterceptorAdapter<EmployeeState, EmployeeEvent> {
 
+    @Value(value = "employees.header.id")
+    public String employeesIdHeader;
+
     private final EmployeeRepository employeeRepository;
 
     @Override
@@ -27,7 +31,7 @@ public class EmployeeStateChangeInterceptor extends StateMachineInterceptorAdapt
                                StateMachine<EmployeeState, EmployeeEvent> rootStateMachine) {
 
         Optional.ofNullable(message).ifPresent(msg -> {
-            Optional.ofNullable(msg.getHeaders().get(EmployeeServiceImpl.EMPLOYEE_ID_HEADER)).ifPresent(employeeId -> {
+            Optional.ofNullable(msg.getHeaders().get(employeesIdHeader)).ifPresent(employeeId -> {
                 employeeRepository.findById(employeeId.toString()).ifPresent(employee -> {
                     employee.setState(state.getId());
                     employeeRepository.save(employee);

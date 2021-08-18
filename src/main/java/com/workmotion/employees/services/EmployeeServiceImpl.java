@@ -1,20 +1,21 @@
 package com.workmotion.employees.services;
 
-import com.workmotion.employees.listeners.EmployeeStateChangeInterceptor;
+import com.workmotion.employees.builders.EmployeeStateMachineBuilder;
+import com.workmotion.employees.dto.KafkaEmployeeEvent;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.config.StateMachineFactory;
-import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-
-import java.util.Optional;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +23,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     //TODO: error handling and testing
     //TODO: error codes
-    public static final String EMPLOYEE_ID_HEADER = "employee_id";
+    @Value(value = "employees.header.id")
+    public String employeesIdHeader;
+
+    @Value(value = "${employees.topic}")
+    public String employeesTopic;
 
     private final EmployeeRepository employeeRepository;
-    private final StateMachineFactory<EmployeeState, EmployeeEvent> stateMachineFactory;
-    private final EmployeeStateChangeInterceptor employeeStateChangeInterceptor;
+    private final EmployeeStateMachineBuilder employeeStateMachineBuilder;
+    private final KafkaTemplate<String, KafkaEmployeeEvent> kafkaTemplate;
 
     public Employee create(Employee employee) {
         employee.setState(EmployeeState.ADDED);
@@ -35,41 +40,38 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee sendEvent(String employeeId, EmployeeEvent event) throws Exception {
-        StateMachine<EmployeeState, EmployeeEvent> stateMachine = build(employeeId);
+    public Employee sendEventStateMachine(String employeeId, EmployeeEvent event) throws Exception {
+        StateMachine<EmployeeState, EmployeeEvent> stateMachine = employeeStateMachineBuilder.build(employeeId);
 
         sendEvent(employeeId, stateMachine, event);
 
         return employeeRepository.findById(employeeId).get();
     }
 
-    //TODO: check if there is a new/better way to do this
-    private StateMachine<EmployeeState, EmployeeEvent> build(String employeeId) throws Exception {
-        Optional<Employee> employee = employeeRepository.findById(employeeId);
+    @Override
+    public Employee sendEventKafka(String employeeId, EmployeeEvent event) {
+        KafkaEmployeeEvent kafkaEmployeeEvent = new KafkaEmployeeEvent(event.toString(), employeeId);
+        ListenableFuture<SendResult<String, KafkaEmployeeEvent>> future = kafkaTemplate.send(employeesTopic, kafkaEmployeeEvent);
 
-        if (employee.isPresent()) {
-            StateMachine<EmployeeState, EmployeeEvent> stateMachine = stateMachineFactory.getStateMachine(employeeId);
+        future.addCallback(new ListenableFutureCallback<>() {
 
-            stateMachine.stop();
+            @Override
+            public void onSuccess(SendResult<String, KafkaEmployeeEvent> result) {
+                System.out.println("Sent message=[" + kafkaEmployeeEvent + "] with offset=[" + result.getRecordMetadata().offset() + "]");
+            }
 
-            stateMachine.getStateMachineAccessor()
-                    .doWithAllRegions(stateMachineAccessor -> {
-                        stateMachineAccessor.addStateMachineInterceptor(employeeStateChangeInterceptor);
-                        stateMachineAccessor.resetStateMachine(new DefaultStateMachineContext<>(employee.get().getState(), null, null, null));
-                    });
+            @Override
+            public void onFailure(Throwable ex) {
+                System.out.println("Unable to send message=[" + kafkaEmployeeEvent + "] due to : " + ex.getMessage());
+            }
+        });
 
-            stateMachine.start();
-
-            return stateMachine;
-
-        } else {
-            throw new Exception(String.format("No employees found with id [$s]", employeeId)); //TODO: convert this into an appropriate error code
-        }
+        return employeeRepository.findById(employeeId).get();
     }
 
     private void sendEvent(String employeeId, StateMachine<EmployeeState, EmployeeEvent> stateMachine, EmployeeEvent event) {
         Message message = MessageBuilder.withPayload(event)
-                .setHeader(EMPLOYEE_ID_HEADER, employeeId)
+                .setHeader(employeesIdHeader, employeeId)
                 .build();
 
         stateMachine.sendEvent(message);
