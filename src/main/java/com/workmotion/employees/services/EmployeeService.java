@@ -10,4 +10,6 @@ public interface EmployeeService {
     Employee sendEventStateMachine(String employeeId, EmployeeEvent event) throws Exception;
 
     Employee sendEventKafka(String employeeId, EmployeeEvent event) throws Exception;
+
+    Employee getEmployee(String employeeId) throws Exception;
 }

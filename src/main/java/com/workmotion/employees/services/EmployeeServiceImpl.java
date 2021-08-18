@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
+    //TODO: can not use the same topic in two runs?
     //TODO: error handling and testing
     //TODO: error codes
     @Value(value = "${employees.topic}")
@@ -65,5 +66,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         });
 
         return employeeRepository.findById(employeeId).get();
+    }
+
+    @Override
+    public Employee getEmployee(String employeeId) throws Exception {
+        return employeeRepository.findById(employeeId).orElseThrow(() -> new Exception(String.format("No employee found with id %s", employeeId)));
     }
 }

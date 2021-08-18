@@ -4,10 +4,7 @@ import com.workmotion.employees.dto.EmployeeEventDTO;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.services.EmployeeService;
 import com.workmotion.employees.services.EmployeeServiceImpl;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class EmployeeController {
@@ -32,5 +29,10 @@ public class EmployeeController {
     @PostMapping("/api/v1/employees/{id}/state-event/kafka")
     public Employee sendEventKafka(@PathVariable String id, @RequestBody EmployeeEventDTO eventDTO) throws Exception {
         return employeeService.sendEventKafka(id, eventDTO.getEvent());
+    }
+
+    @GetMapping("/api/v1/employees/{id}")
+    public Employee getEmployee(@PathVariable String id) throws Exception {
+        return employeeService.getEmployee(id);
     }
 }
