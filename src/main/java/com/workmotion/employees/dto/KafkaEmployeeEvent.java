@@ -1,5 +1,6 @@
 package com.workmotion.employees.dto;
 
+import com.workmotion.employees.models.EmployeeEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class KafkaEmployeeEvent {
 
-    public String key;
+    public EmployeeEvent event;
 
     public String employeeId;
 }

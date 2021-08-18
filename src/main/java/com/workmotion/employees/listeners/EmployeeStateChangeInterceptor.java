@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class EmployeeStateChangeInterceptor extends StateMachineInterceptorAdapter<EmployeeState, EmployeeEvent> {
@@ -29,6 +30,8 @@ public class EmployeeStateChangeInterceptor extends StateMachineInterceptorAdapt
     public void preStateChange(State<EmployeeState, EmployeeEvent> state, Message<EmployeeEvent> message,
                                Transition<EmployeeState, EmployeeEvent> transition, StateMachine<EmployeeState, EmployeeEvent> stateMachine,
                                StateMachine<EmployeeState, EmployeeEvent> rootStateMachine) {
+
+        log.info("State machine received message " + message);
 
         Optional.ofNullable(message).ifPresent(msg -> {
             Optional.ofNullable(msg.getHeaders().get(employeesIdHeader)).ifPresent(employeeId -> {

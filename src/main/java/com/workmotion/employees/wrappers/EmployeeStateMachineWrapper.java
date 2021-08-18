@@ -1,4 +1,4 @@
-package com.workmotion.employees.builders;
+package com.workmotion.employees.wrappers;
 
 import com.workmotion.employees.listeners.EmployeeStateChangeInterceptor;
 import com.workmotion.employees.models.Employee;
@@ -7,6 +7,9 @@ import com.workmotion.employees.models.EmployeeState;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
@@ -15,8 +18,11 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-@AllArgsConstructor
-public class EmployeeStateMachineBuilder {
+@RequiredArgsConstructor
+public class EmployeeStateMachineWrapper {
+
+    @Value(value = "employees.header.id")
+    public String employeesIdHeader;
 
     private final EmployeeRepository employeeRepository;
     private final StateMachineFactory<EmployeeState, EmployeeEvent> stateMachineFactory;
@@ -44,5 +50,13 @@ public class EmployeeStateMachineBuilder {
         } else {
             throw new Exception(String.format("No employees found with id [$s]", employeeId)); //TODO: convert this into an appropriate error code
         }
+    }
+
+    public void sendEvent(EmployeeEvent event, String employeeId, StateMachine<EmployeeState, EmployeeEvent> stateMachine) {
+        Message message = MessageBuilder.withPayload(event)
+                .setHeader(employeesIdHeader, employeeId)
+                .build();
+
+        stateMachine.sendEvent(message);
     }
 }

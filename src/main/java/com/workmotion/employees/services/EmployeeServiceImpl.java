@@ -1,21 +1,21 @@
 package com.workmotion.employees.services;
 
-import com.workmotion.employees.builders.EmployeeStateMachineBuilder;
 import com.workmotion.employees.dto.KafkaEmployeeEvent;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
 import com.workmotion.employees.repositories.EmployeeRepository;
+import com.workmotion.employees.wrappers.EmployeeStateMachineWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +23,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     //TODO: error handling and testing
     //TODO: error codes
-    @Value(value = "employees.header.id")
-    public String employeesIdHeader;
-
     @Value(value = "${employees.topic}")
     public String employeesTopic;
 
     private final EmployeeRepository employeeRepository;
-    private final EmployeeStateMachineBuilder employeeStateMachineBuilder;
+    private final EmployeeStateMachineWrapper employeeStateMachineWrapper;
     private final KafkaTemplate<String, KafkaEmployeeEvent> kafkaTemplate;
 
     public Employee create(Employee employee) {
@@ -41,16 +38,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee sendEventStateMachine(String employeeId, EmployeeEvent event) throws Exception {
-        StateMachine<EmployeeState, EmployeeEvent> stateMachine = employeeStateMachineBuilder.build(employeeId);
+        StateMachine<EmployeeState, EmployeeEvent> stateMachine = employeeStateMachineWrapper.build(employeeId);
 
-        sendEvent(employeeId, stateMachine, event);
+        employeeStateMachineWrapper.sendEvent(event, employeeId, stateMachine);
 
         return employeeRepository.findById(employeeId).get();
     }
 
+    //TODO: what should be returned here
     @Override
-    public Employee sendEventKafka(String employeeId, EmployeeEvent event) {
-        KafkaEmployeeEvent kafkaEmployeeEvent = new KafkaEmployeeEvent(event.toString(), employeeId);
+    public Employee sendEventKafka(String employeeId, EmployeeEvent event) throws ExecutionException, InterruptedException {
+        KafkaEmployeeEvent kafkaEmployeeEvent = new KafkaEmployeeEvent(event, employeeId);
         ListenableFuture<SendResult<String, KafkaEmployeeEvent>> future = kafkaTemplate.send(employeesTopic, kafkaEmployeeEvent);
 
         future.addCallback(new ListenableFutureCallback<>() {
@@ -67,13 +65,5 @@ public class EmployeeServiceImpl implements EmployeeService {
         });
 
         return employeeRepository.findById(employeeId).get();
-    }
-
-    private void sendEvent(String employeeId, StateMachine<EmployeeState, EmployeeEvent> stateMachine, EmployeeEvent event) {
-        Message message = MessageBuilder.withPayload(event)
-                .setHeader(employeesIdHeader, employeeId)
-                .build();
-
-        stateMachine.sendEvent(message);
     }
 }
