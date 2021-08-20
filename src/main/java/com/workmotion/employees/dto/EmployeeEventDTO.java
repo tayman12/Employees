@@ -10,6 +10,7 @@ import org.springframework.lang.NonNull;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class EmployeeEventDTO {
 
     @NonNull

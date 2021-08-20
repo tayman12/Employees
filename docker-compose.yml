@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+#    networks:
+#      - employees
+#    network_mode: host
+    ports:
+      - "27017:27017"
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+#    networks:
+#      - employees
+#    network_mode: host
+    ports:
+      - "2181:2181"
+  kafka:
+    image: confluentinc/cp-kafka
+    container_name: kafka
+#    networks:
+#      - employees
+#    network_mode: host
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      DOCKER_API_VERSION: 1.22
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+#  employees:
+#    build: .
+#    image: employees:v1
+#    container_name: employees
+#    networks:
+#      - employees
+#    network_mode: host
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - zookeeper
+#      - kafka
+#      - mongo
+#networks:
+#  host:
+#    driver: host
