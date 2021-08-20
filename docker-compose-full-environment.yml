@@ -1,10 +1,12 @@
 version: "3.9"
 services:
+
   mongo:
     image: mongo
     container_name: mongo
     ports:
       - "27017:27017"
+
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: zookeeper
@@ -27,6 +29,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,DOCKER:PLAINTEXT
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
   employees:
     build: .
     image: employees:v1
