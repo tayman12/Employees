@@ -49,6 +49,7 @@ public class EmployeeControllerIntegrationTest {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    //TODO: testing containers slows down tests dramatically
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo"));
     private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"));
 
