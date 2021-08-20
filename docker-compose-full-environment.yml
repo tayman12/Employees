@@ -14,7 +14,7 @@ services:
     image: confluentinc/cp-kafka
     container_name: kafka
     ports:
-      - "9092:9092"
+      - "9093:9092"
     depends_on:
       - zookeeper
     environment:
@@ -27,3 +27,15 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,DOCKER:PLAINTEXT
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  employees:
+    build: .
+    image: employees:v1
+    container_name: employees
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zookeeper
+      - kafka
+      - mongo
+    environment:
+      spring_profiles_active: docker

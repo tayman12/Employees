@@ -42,8 +42,19 @@ jar {
 	}
 }
 
-task buildWholeEnvironment(type: Exec) {
-	dependsOn clean
-	dependsOn bootJar
+task buildSupportingEnvironment(type: Exec) {
 	commandLine  "bash", "-c", "docker-compose up --build -d"
 }
+
+task buildFullEnvironment(type: Exec) {
+	dependsOn clean
+	dependsOn bootJar
+
+	mustRunAfter clean
+	mustRunAfter bootJar
+
+	commandLine  "bash", "-c", "docker-compose -f docker-compose-full-environment.yml up --build -d"
+}
+
+bootJar.dependsOn clean
+compileJava.dependsOn clean
