@@ -28,6 +28,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 
+	testImplementation 'com.atlassian.oai:swagger-request-validator-mockmvc:2.18.1'
+	testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
+
 	testImplementation 'org.testcontainers:testcontainers:1.16.0'
 	testImplementation 'org.testcontainers:mongodb:1.16.0'
 	testImplementation 'org.testcontainers:kafka:1.16.0'

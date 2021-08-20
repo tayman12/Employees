@@ -12,6 +12,8 @@ import java.util.*;
 @AllArgsConstructor
 public class ApiException extends Exception {
 
+    public String code;
+
     public String message;
 
     public HttpStatus status;
@@ -23,6 +25,7 @@ public class ApiException extends Exception {
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
 
+        map.put("code", code);
         map.put("message", message);
         map.put("timestamp", timestamp);
         map.put("status", status.value());

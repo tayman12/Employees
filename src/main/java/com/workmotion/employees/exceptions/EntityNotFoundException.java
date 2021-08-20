@@ -10,9 +10,8 @@ public class EntityNotFoundException extends BaseException {
     private String entityType;
 
     public EntityNotFoundException(String entityId, String entityType) {
-        setMessage(String.format("%s not found", entityType));
+        setMessage(String.format("%s with id [%s] is not found", entityType, entityId));
         setStatus(HttpStatus.NOT_FOUND);
-        getErrors().add(String.format("%s with id [%s] is not found", entityType, entityId));
 
         this.entityId = entityId;
         this.entityType = entityType;

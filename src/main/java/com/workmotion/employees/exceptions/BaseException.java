@@ -4,4 +4,9 @@ import lombok.Data;
 
 @Data
 public class BaseException extends ApiException {
+
+    //TODO: test code
+    public BaseException() {
+        setCode(this.getClass().getSimpleName());
+    }
 }

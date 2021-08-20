@@ -208,6 +208,25 @@ class EmployeeTest {
     }
 
     @Test
+    public void moreThanTheMaxAgeThrows() {
+        Employee employee = new Employee();
+
+        employee.setStaffId("123");
+        employee.setFirstName("Tocka");
+        employee.setLastName("Ayman");
+        employee.setState(EmployeeState.ADDED);
+        employee.setMobileNo("01128821968");
+        employee.setAge(140);
+
+        Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
+
+        assertEquals(1, violations.size());
+
+        assertEquals("age", ((ConstraintViolation) violations.toArray()[0]).getPropertyPath().toString());
+        assertEquals("interface org.hibernate.validator.constraints.Range", ((ConstraintViolation) violations.toArray()[0]).getConstraintDescriptor().getAnnotation().annotationType().toString());
+    }
+
+    @Test
     public void validEmployeeDoesNotThrow() {
         Employee employee = new Employee();
 

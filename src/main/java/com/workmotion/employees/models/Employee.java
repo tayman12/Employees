@@ -34,6 +34,6 @@ public class Employee {
     public String mobileNo;
 
     @NotNull
-    @Range(min = 1)
+    @Range(min = 1, max = 120)
     public Integer age;
 }

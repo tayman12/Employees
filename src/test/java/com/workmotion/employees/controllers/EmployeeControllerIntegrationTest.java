@@ -1,11 +1,13 @@
 package com.workmotion.employees.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.workmotion.employees.dto.EmployeeEventDTO;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
 import com.workmotion.employees.repositories.EmployeeRepository;
+import io.swagger.util.Json;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +25,11 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers.openApi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -55,6 +60,8 @@ public class EmployeeControllerIntegrationTest {
 
         kafkaContainer.start();
         mongoDBContainer.start();
+
+        Json.mapper().registerModule(new JavaTimeModule());
     }
 
     @BeforeEach
@@ -70,32 +77,33 @@ public class EmployeeControllerIntegrationTest {
 
     @Test
     public void creatingEmployeeSavesHimIntoDB() throws Exception {
-        Employee employee = new Employee();
+        Map<String, Object> employee = new HashMap<>();
 
-        employee.setStaffId("123");
-        employee.setFirstName("Tocka");
-        employee.setLastName("Ayman");
-        employee.setMobileNo("01128821968");
-        employee.setAge(4);
+        employee.put("staffId", "123");
+        employee.put("firstName", "Tocka");
+        employee.put("lastName", "Ayman");
+        employee.put("mobileNo", "01128821968");
+        employee.put("age", 4);
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/employees")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(employee)))
                 .andExpect(status().isOk())
+                .andExpect(openApi().isValid("employees.yaml"))
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
 
         Employee responseEmployee = objectMapper.readValue(content, Employee.class);
 
-        employee.setState(EmployeeState.ADDED);
+        Employee expected = new Employee(null, "123", "Tocka", "Ayman", EmployeeState.ADDED, "01128821968", 4);
 
-        validateEmployee(employee, responseEmployee);
+        validateEmployee(expected, responseEmployee);
 
         List<Employee> employees = employeeRepository.findAll();
 
         assertEquals(1, employees.size());
-        validateEmployee(employee, employees.get(0));
+        validateEmployee(expected, employees.get(0));
     }
 
     @Test
@@ -115,6 +123,7 @@ public class EmployeeControllerIntegrationTest {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/employees/789")
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
+                .andExpect(openApi().isValid("employees.yaml"))
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
@@ -144,6 +153,7 @@ public class EmployeeControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(employeeEventDTO)))
                 .andExpect(status().isOk())
+                .andExpect(openApi().isValid("employees.yaml"))
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();

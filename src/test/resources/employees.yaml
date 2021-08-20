@@ -1,0 +1,287 @@
+openapi: 3.0.0
+servers:
+  - url: 'localhost:8080'
+info:
+  version: "1.0_oas3"
+  title: Employees endpoints
+
+paths:
+
+  /api/v1/employees:
+    post:
+      tags:
+        - Employees
+      description: Create new employee
+      operationId: createNewEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeCreationRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeCreationResponse"
+        '400':
+          $ref: '#/components/responses/errorResponse'
+        '500':
+          $ref: '#/components/responses/errorResponse'
+
+  /api/v1/employees/{id}:
+    get:
+      tags:
+        - Employees
+      description: Get employee by id
+      operationId: getEmployeeById
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GettingEmployeeResponse"
+        '400':
+          $ref: '#/components/responses/errorResponse'
+        '500':
+          $ref: '#/components/responses/errorResponse'
+
+  /api/v1/employees/{id}/state-event:
+    post:
+      tags:
+        - Employees
+      description: Sending employee state event
+      operationId: SendingEmployeeStateEvent
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeStateEventRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeStateEventResponse"
+        '400':
+          $ref: '#/components/responses/errorResponse'
+        '500':
+          $ref: '#/components/responses/errorResponse'
+
+components:
+  schemas:
+
+    EmployeeCreationRequest:
+      type: object
+      properties:
+        staffId:
+          type: string
+          example: "123"
+        firstName:
+          type: string
+          example: "Tocka"
+        lastName:
+          type: string
+          example: "Ayman"
+        mobileNo:
+          type: string
+          example: "01128821968"
+        age:
+          type: integer
+          format: int32
+          example: 10
+          minimum: 1
+          maximum: 120
+      required:
+        - staffId
+        - firstName
+        - lastName
+        - mobileNo
+        - age
+
+    EmployeeCreationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123"
+        staffId:
+          type: string
+          example: "123"
+        firstName:
+          type: string
+          example: "Tocka"
+        lastName:
+          type: string
+          example: "Ayman"
+        mobileNo:
+          type: string
+          example: "01128821968"
+        age:
+          type: integer
+          format: int32
+          example: 10
+          minimum: 1
+          maximum: 120
+        state:
+          $ref: "#/components/schemas/EmployeeState"
+      required:
+        - id
+        - staffId
+        - firstName
+        - lastName
+        - mobileNo
+        - age
+        - state
+
+    GettingEmployeeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123"
+        staffId:
+          type: string
+          example: "123"
+        firstName:
+          type: string
+          example: "Tocka"
+        lastName:
+          type: string
+          example: "Ayman"
+        mobileNo:
+          type: string
+          example: "01128821968"
+        age:
+          type: integer
+          format: int32
+          example: 10
+          minimum: 1
+          maximum: 120
+        state:
+          $ref: "#/components/schemas/EmployeeState"
+      required:
+        - id
+        - staffId
+        - firstName
+        - lastName
+        - mobileNo
+        - age
+        - state
+
+    EmployeeStateEventRequest:
+      type: object
+      properties:
+        event:
+          $ref: "#/components/schemas/EmployeeEvent"
+      required:
+        - event
+
+    EmployeeStateEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123"
+        staffId:
+          type: string
+          example: "123"
+        firstName:
+          type: string
+          example: "Tocka"
+        lastName:
+          type: string
+          example: "Ayman"
+        mobileNo:
+          type: string
+          example: "01128821968"
+        age:
+          type: integer
+          format: int32
+          example: 10
+          minimum: 1
+          maximum: 120
+        state:
+          $ref: "#/components/schemas/EmployeeState"
+      required:
+        - id
+        - staffId
+        - firstName
+        - lastName
+        - mobileNo
+        - age
+        - state
+
+    EmployeeState:
+      type: string
+      enum:
+        - ADDED
+        - IN_CHECK
+        - APPROVED
+        - ACTIVE
+      example: 'ADDED'
+
+    EmployeeEvent:
+      type: string
+      enum:
+        - CHECK
+        - APPROVE
+        - ACTIVATE
+      example: 'CHECK'
+
+    ErrorPayload:
+      type: object
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: array
+          items:
+            type: string
+            example: "Entity not found"
+        timestamp:
+          type: string
+          format: date-time
+          example: 2021-08-20T18:25:42.312+00:00
+          description: Timestamp when the error happened
+      required:
+        - code
+        - message
+        - timestamp
+
+    ErrorCode:
+      type: string
+      enum:
+        - EntityNotFoundException
+        - MethodArgumentNotValidException
+      example: 'EntityNotFoundException'
+
+  responses:
+    errorResponse:
+      description: Error happened
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorPayload'
+
+  parameters:
+    idPathParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        example: "123"
+      description: id in path param

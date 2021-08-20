@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -80,11 +79,11 @@ class EmployeeControllerTest {
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> employeeController.getEmployee("123"));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+        assertEquals(EntityNotFoundException.class.getSimpleName(), ex.getCode());
         assertEquals("123", ex.getEntityId());
         assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
-        assertEquals("Employee not found", ex.getMessage());
-        assertEquals(1, ex.getErrors().size());
-        assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
+        assertEquals("Employee with id [123] is not found", ex.getMessage());
+        assertTrue(ex.getErrors().isEmpty());
     }
 
     @Test
@@ -104,11 +103,11 @@ class EmployeeControllerTest {
                 employeeController.sendEvent("123", new EmployeeEventDTO(EmployeeEvent.APPROVE)));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+        assertEquals(EntityNotFoundException.class.getSimpleName(), ex.getCode());
         assertEquals("123", ex.getEntityId());
         assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
-        assertEquals("Employee not found", ex.getMessage());
-        assertEquals(1, ex.getErrors().size());
-        assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
+        assertEquals("Employee with id [123] is not found", ex.getMessage());
+        assertTrue(ex.getErrors().isEmpty());
     }
 
     //TODO: search how to test kafka events

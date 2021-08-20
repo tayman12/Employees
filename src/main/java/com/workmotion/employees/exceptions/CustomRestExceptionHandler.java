@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    //TODO: add tests
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ApiException apiException = new ApiException();
@@ -22,6 +23,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         apiException.setMessage("Method argument not valid");
         apiException.setTimestamp(new Date());
         apiException.setStatus(status);
+        apiException.setCode(ex.getClass().getSimpleName());
 
         apiException.setErrors(ex.getBindingResult()
                 .getFieldErrors()

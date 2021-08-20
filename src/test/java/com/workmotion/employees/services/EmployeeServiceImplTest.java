@@ -19,8 +19,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,11 +70,11 @@ class EmployeeServiceImplTest {
 
         } catch (EntityNotFoundException ex) {
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+            assertEquals(EntityNotFoundException.class.getSimpleName(), ex.getCode());
             assertEquals("123", ex.getEntityId());
             assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
-            assertEquals("Employee not found", ex.getMessage());
-            assertEquals(1, ex.getErrors().size());
-            assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
+            assertEquals("Employee with id [123] is not found", ex.getMessage());
+            assertTrue(ex.getErrors().isEmpty());
         }
     }
 
@@ -111,11 +110,11 @@ class EmployeeServiceImplTest {
 
         } catch (EntityNotFoundException ex) {
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+            assertEquals(EntityNotFoundException.class.getSimpleName(), ex.getCode());
             assertEquals("123", ex.getEntityId());
             assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
-            assertEquals("Employee not found", ex.getMessage());
-            assertEquals(1, ex.getErrors().size());
-            assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
+            assertEquals("Employee with id [123] is not found", ex.getMessage());
+            assertTrue(ex.getErrors().isEmpty());
         }
     }
 

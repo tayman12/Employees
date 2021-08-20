@@ -21,7 +21,6 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
-    //TODO: can not use the same topic in two runs?
     //TODO: error handling and testing
     //TODO: error codes
     @Value(value = "${employees.topic}")
