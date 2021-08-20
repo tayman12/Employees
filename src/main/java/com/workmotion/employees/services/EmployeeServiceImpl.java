@@ -4,7 +4,7 @@ import com.workmotion.employees.dto.KafkaEmployeeEvent;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
-import com.workmotion.employees.models.EntityNotFoundException;
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import com.workmotion.employees.validator.EmployeeShouldExistByIdValidator;
 import lombok.RequiredArgsConstructor;

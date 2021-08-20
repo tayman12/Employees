@@ -4,7 +4,7 @@ import com.workmotion.employees.dto.KafkaEmployeeEvent;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
-import com.workmotion.employees.models.EntityNotFoundException;
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -69,9 +70,12 @@ class EmployeeServiceImplTest {
             employeeService.getEmployee("123");
 
         } catch (EntityNotFoundException ex) {
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
             assertEquals("123", ex.getEntityId());
             assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
-            assertEquals("Employee with id [123] is not found", ex.getMessage());
+            assertEquals("Employee not found", ex.getMessage());
+            assertEquals(1, ex.getErrors().size());
+            assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
         }
     }
 
@@ -106,9 +110,12 @@ class EmployeeServiceImplTest {
             employeeService.sendEvent("123", EmployeeEvent.ACTIVATE);
 
         } catch (EntityNotFoundException ex) {
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
             assertEquals("123", ex.getEntityId());
             assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
-            assertEquals("Employee with id [123] is not found", ex.getMessage());
+            assertEquals("Employee not found", ex.getMessage());
+            assertEquals(1, ex.getErrors().size());
+            assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
         }
     }
 

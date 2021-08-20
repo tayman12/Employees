@@ -1,6 +1,7 @@
-package com.workmotion.employees.models;
+package com.workmotion.employees.exceptions;
 
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 @Data
 public class EntityNotFoundException extends BaseException {
@@ -9,7 +10,9 @@ public class EntityNotFoundException extends BaseException {
     private String entityType;
 
     public EntityNotFoundException(String entityId, String entityType) {
-        super(String.format("%s with id [%s] is not found", entityType, entityId));
+        setMessage(String.format("%s not found", entityType));
+        setStatus(HttpStatus.NOT_FOUND);
+        getErrors().add(String.format("%s with id [%s] is not found", entityType, entityId));
 
         this.entityId = entityId;
         this.entityType = entityType;

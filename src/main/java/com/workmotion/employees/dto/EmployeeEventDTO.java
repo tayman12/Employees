@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
 
 @Data
 @Builder
@@ -13,6 +12,5 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 public class EmployeeEventDTO {
 
-    @NonNull
     EmployeeEvent event;
 }

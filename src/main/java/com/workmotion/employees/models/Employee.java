@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.lang.NonNull;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -14,26 +16,24 @@ import org.springframework.lang.NonNull;
 @AllArgsConstructor
 public class Employee {
 
-    //TODO: mandatory parameters
-
     @Id
     public String id;
 
-    @NonNull
-    @Indexed(unique = true) // do we need validator here?
+    @NotBlank
     public String staffId;
 
-    @NonNull
+    @NotBlank
     public String firstName;
 
-    @NonNull
+    @NotBlank
     public String lastName;
 
     public EmployeeState state;
 
-    @NonNull
+    @NotBlank
     public String mobileNo;
 
-    @NonNull
-    public int age;
+    @NotNull
+    @Range(min = 1)
+    public Integer age;
 }

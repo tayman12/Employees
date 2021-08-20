@@ -1,7 +1,7 @@
 package com.workmotion.employees.validator;
 
 import com.workmotion.employees.models.Employee;
-import com.workmotion.employees.models.EntityNotFoundException;
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import lombok.AllArgsConstructor;
 

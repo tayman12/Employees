@@ -1,15 +1,18 @@
 package com.workmotion.employees.controllers;
 
 import com.workmotion.employees.dto.EmployeeEventDTO;
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.KafkaContainer;
@@ -33,14 +36,22 @@ class EmployeeControllerTest {
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo"));
     private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka"));
 
+    @Autowired
+    MongoTemplate mongoTemplate;
+
     @BeforeAll
-    static void setup() {
+    static void setupAll() {
         List<String> ports = new ArrayList<>();
         ports.add("9092:9093");
         kafkaContainer.setPortBindings(ports);
 
         kafkaContainer.start();
         mongoDBContainer.start();
+    }
+
+    @BeforeEach
+    public void setup() {
+        mongoTemplate.dropCollection(Employee.class);
     }
 
     @AfterAll
@@ -66,15 +77,18 @@ class EmployeeControllerTest {
 
     @Test
     void getEmployeeReturnsNotFoundIfNoEmployeeExist() {
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
-                employeeController.getEmployee("123"));
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> employeeController.getEmployee("123"));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
-        assertEquals("Employee with id [123] is not found", ex.getReason());
+        assertEquals("123", ex.getEntityId());
+        assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
+        assertEquals("Employee not found", ex.getMessage());
+        assertEquals(1, ex.getErrors().size());
+        assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
     }
 
     @Test
-    void getEmployeeReturnsHimCorrectly() {
+    void getEmployeeReturnsHimCorrectly() throws EntityNotFoundException {
         Employee employee = Employee.builder().staffId("456").firstName("Tocka").lastName("Ayman").age(9).mobileNo("01128821968").build();
 
         Employee savedEmployee = employeeController.create(employee);
@@ -86,23 +100,27 @@ class EmployeeControllerTest {
 
     @Test
     void sendEventReturnsNotFoundIfNoEmployeeExist() {
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () ->
                 employeeController.sendEvent("123", new EmployeeEventDTO(EmployeeEvent.APPROVE)));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
-        assertEquals("Employee with id [123] is not found", ex.getReason());
+        assertEquals("123", ex.getEntityId());
+        assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
+        assertEquals("Employee not found", ex.getMessage());
+        assertEquals(1, ex.getErrors().size());
+        assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
     }
 
     //TODO: search how to test kafka events
     @Test
-    void sendEventSendsTheEventAndMakeTheStatusTransition() throws InterruptedException {
+    void sendEventSendsTheEventAndMakeTheStatusTransition() throws InterruptedException, EntityNotFoundException {
         Employee employee = Employee.builder().staffId("456").firstName("Tocka").lastName("Ayman").age(9).mobileNo("01128821968").build();
 
         Employee savedEmployee = employeeController.create(employee);
 
         employeeController.sendEvent(savedEmployee.getId(), new EmployeeEventDTO(EmployeeEvent.CHECK));
 
-        Thread.sleep(500);
+        Thread.sleep(2000);
 
         Employee updatedEmployee = employeeRepository.findById(savedEmployee.getId()).get();
 

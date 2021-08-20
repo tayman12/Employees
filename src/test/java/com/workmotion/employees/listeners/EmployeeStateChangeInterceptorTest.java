@@ -82,6 +82,7 @@ class EmployeeStateChangeInterceptorTest {
         verify(employeeRepository, times(0)).save(any());
     }
 
+    //TODO: set values instead of null
     @Test
     public void receivingMessageSetsStateAndSavesEmployee() {
         employeeStateChangeInterceptor = new EmployeeStateChangeInterceptor(employeeRepository);

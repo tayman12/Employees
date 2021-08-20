@@ -1,7 +1,7 @@
 package com.workmotion.employees.validator;
 
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.models.Employee;
-import com.workmotion.employees.models.EntityNotFoundException;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,9 @@ class EmployeeShouldExistByIdValidatorTest {
         } catch (EntityNotFoundException ex) {
             assertEquals("123", ex.getEntityId());
             assertEquals(Employee.class.getSimpleName(), ex.getEntityType());
-            assertEquals("Employee with id [123] is not found", ex.getMessage());
+            assertEquals("Employee not found", ex.getMessage());
+            assertEquals(1, ex.getErrors().size());
+            assertEquals("Employee with id [123] is not found", ex.getErrors().get(0));
         }
     }
 
