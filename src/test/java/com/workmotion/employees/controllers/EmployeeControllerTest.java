@@ -16,6 +16,7 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,8 +35,12 @@ class EmployeeControllerTest {
 
     @BeforeAll
     static void setup() {
-        mongoDBContainer.start();
+        List<String> ports = new ArrayList<>();
+        ports.add("9092:9093");
+        kafkaContainer.setPortBindings(ports);
+
         kafkaContainer.start();
+        mongoDBContainer.start();
     }
 
     @AfterAll
@@ -61,7 +66,8 @@ class EmployeeControllerTest {
 
     @Test
     void getEmployeeReturnsNotFoundIfNoEmployeeExist() {
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> employeeController.getEmployee("123"));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                employeeController.getEmployee("123"));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertEquals("Employee with id [123] is not found", ex.getReason());
@@ -80,7 +86,8 @@ class EmployeeControllerTest {
 
     @Test
     void sendEventReturnsNotFoundIfNoEmployeeExist() {
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> employeeController.sendEvent("123", new EmployeeEventDTO(EmployeeEvent.APPROVE)));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                employeeController.sendEvent("123", new EmployeeEventDTO(EmployeeEvent.APPROVE)));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertEquals("Employee with id [123] is not found", ex.getReason());
@@ -95,7 +102,7 @@ class EmployeeControllerTest {
 
         employeeController.sendEvent(savedEmployee.getId(), new EmployeeEventDTO(EmployeeEvent.CHECK));
 
-        Thread.sleep(200);
+        Thread.sleep(500);
 
         Employee updatedEmployee = employeeRepository.findById(savedEmployee.getId()).get();
 
