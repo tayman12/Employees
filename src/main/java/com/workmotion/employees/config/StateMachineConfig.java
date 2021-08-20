@@ -27,6 +27,7 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<EmployeeSt
                 .end(EmployeeState.ACTIVE);
     }
 
+    //TODO: how to test state transitions
     @Override
     public void configure(StateMachineTransitionConfigurer<EmployeeState, EmployeeEvent> transitions) throws Exception {
         transitions.withExternal().source(EmployeeState.ADDED).target(EmployeeState.IN_CHECK).event(EmployeeEvent.CHECK)
