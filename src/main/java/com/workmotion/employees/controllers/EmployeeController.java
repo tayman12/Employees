@@ -2,37 +2,42 @@ package com.workmotion.employees.controllers;
 
 import com.workmotion.employees.dto.EmployeeEventDTO;
 import com.workmotion.employees.models.Employee;
+import com.workmotion.employees.models.EntityNotFoundException;
 import com.workmotion.employees.services.EmployeeService;
-import com.workmotion.employees.services.EmployeeServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/api/v1/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    public EmployeeController(EmployeeServiceImpl employeeService) {
-        this.employeeService = employeeService;
-    }
-
     @PostMapping
-    public Employee create(@RequestBody Employee employee) {
+    public Employee create(@RequestBody @Validated Employee employee) {
         return employeeService.create(employee);
     }
 
-    @PostMapping("/{id}/state-event")
-    public Employee sendEvent(@PathVariable String id, @RequestBody EmployeeEventDTO eventDTO) throws Exception {
-        return employeeService.sendEventStateMachine(id, eventDTO.getEvent());
-    }
-
-    @PostMapping("/{id}/state-event/kafka")
-    public Employee sendEventKafka(@PathVariable String id, @RequestBody EmployeeEventDTO eventDTO) throws Exception {
-        return employeeService.sendEventKafka(id, eventDTO.getEvent());
-    }
-
     @GetMapping("/{id}")
-    public Employee getEmployee(@PathVariable String id) throws Exception {
-        return employeeService.getEmployee(id);
+    public Employee getEmployee(@PathVariable @Validated @NonNull String id) {
+        try {
+            return employeeService.getEmployee(id);
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.message);
+        }
+    }
+
+    @PostMapping("/{id}/state-event")
+    public Employee sendEvent(@PathVariable @Validated @NonNull String id, @RequestBody @Validated EmployeeEventDTO eventDTO) {
+        try {
+            return employeeService.sendEvent(id, eventDTO.getEvent());
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.message);
+        }
     }
 }

@@ -4,19 +4,19 @@ import com.workmotion.employees.dto.KafkaEmployeeEvent;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
+import com.workmotion.employees.models.EntityNotFoundException;
 import com.workmotion.employees.repositories.EmployeeRepository;
-import com.workmotion.employees.wrappers.EmployeeStateMachineWrapper;
+import com.workmotion.employees.validator.EmployeeShouldExistByIdValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.statemachine.StateMachine;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import java.util.concurrent.ExecutionException;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
@@ -28,9 +28,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public String employeesTopic;
 
     private final EmployeeRepository employeeRepository;
-    private final EmployeeStateMachineWrapper employeeStateMachineWrapper;
     private final KafkaTemplate<String, KafkaEmployeeEvent> kafkaTemplate;
 
+    @Override
     public Employee create(Employee employee) {
         employee.setState(EmployeeState.ADDED);
 
@@ -38,17 +38,17 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee sendEventStateMachine(String employeeId, EmployeeEvent event) throws Exception {
-        StateMachine<EmployeeState, EmployeeEvent> stateMachine = employeeStateMachineWrapper.build(employeeId);
-
-        employeeStateMachineWrapper.sendEvent(event, employeeId, stateMachine);
+    public Employee getEmployee(String employeeId) throws EntityNotFoundException {
+        new EmployeeShouldExistByIdValidator(employeeId, employeeRepository).validate();
 
         return employeeRepository.findById(employeeId).get();
     }
 
     //TODO: what should be returned here
     @Override
-    public Employee sendEventKafka(String employeeId, EmployeeEvent event) throws ExecutionException, InterruptedException {
+    public Employee sendEvent(String employeeId, EmployeeEvent event) throws EntityNotFoundException {
+        new EmployeeShouldExistByIdValidator(employeeId, employeeRepository).validate();
+
         KafkaEmployeeEvent kafkaEmployeeEvent = new KafkaEmployeeEvent(event, employeeId);
         ListenableFuture<SendResult<String, KafkaEmployeeEvent>> future = kafkaTemplate.send(employeesTopic, kafkaEmployeeEvent);
 
@@ -56,20 +56,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
             @Override
             public void onSuccess(SendResult<String, KafkaEmployeeEvent> result) {
-                System.out.println("Sent message=[" + kafkaEmployeeEvent + "] with offset=[" + result.getRecordMetadata().offset() + "]");
+                log.debug("Sent message=[" + kafkaEmployeeEvent + "] with offset=[" + result.getRecordMetadata().offset() + "]");
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                System.out.println("Unable to send message=[" + kafkaEmployeeEvent + "] due to : " + ex.getMessage());
+                log.debug("Unable to send message=[" + kafkaEmployeeEvent + "] due to : " + ex.getMessage());
             }
         });
 
         return employeeRepository.findById(employeeId).get();
-    }
-
-    @Override
-    public Employee getEmployee(String employeeId) throws Exception {
-        return employeeRepository.findById(employeeId).orElseThrow(() -> new Exception(String.format("No employee found with id %s", employeeId)));
     }
 }

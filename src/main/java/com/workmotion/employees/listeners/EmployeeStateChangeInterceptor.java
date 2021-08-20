@@ -3,7 +3,6 @@ package com.workmotion.employees.listeners;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
 import com.workmotion.employees.repositories.EmployeeRepository;
-import com.workmotion.employees.services.EmployeeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +30,7 @@ public class EmployeeStateChangeInterceptor extends StateMachineInterceptorAdapt
                                Transition<EmployeeState, EmployeeEvent> transition, StateMachine<EmployeeState, EmployeeEvent> stateMachine,
                                StateMachine<EmployeeState, EmployeeEvent> rootStateMachine) {
 
-        log.info("State machine received message " + message);
+        log.info("Employee state machine interceptor received message {}", message);
 
         Optional.ofNullable(message).ifPresent(msg -> {
             Optional.ofNullable(msg.getHeaders().get(employeesIdHeader)).ifPresent(employeeId -> {
@@ -42,5 +41,6 @@ public class EmployeeStateChangeInterceptor extends StateMachineInterceptorAdapt
             });
         });
 
+        log.debug("Employee state machine interceptor processed message {} successfully", message);
     }
 }

@@ -4,6 +4,7 @@ import com.workmotion.employees.listeners.EmployeeStateChangeInterceptor;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
+import com.workmotion.employees.models.EntityNotFoundException;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class EmployeeStateMachineWrapper {
     private final EmployeeStateChangeInterceptor employeeStateChangeInterceptor;
 
     //TODO: check if there is a new/better way to do this
-    public StateMachine<EmployeeState, EmployeeEvent> build(String employeeId) throws Exception {
+    public StateMachine<EmployeeState, EmployeeEvent> build(String employeeId) throws EntityNotFoundException {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
 
         if (employee.isPresent()) {
@@ -48,7 +49,7 @@ public class EmployeeStateMachineWrapper {
             return stateMachine;
 
         } else {
-            throw new Exception(String.format("No employees found with id [$s]", employeeId)); //TODO: convert this into an appropriate error code
+            throw new EntityNotFoundException(employeeId, Employee.class.getSimpleName());
         }
     }
 

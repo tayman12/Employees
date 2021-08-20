@@ -2,14 +2,13 @@ package com.workmotion.employees.services;
 
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
+import com.workmotion.employees.models.EntityNotFoundException;
 
 public interface EmployeeService {
 
     Employee create(Employee employee);
 
-    Employee sendEventStateMachine(String employeeId, EmployeeEvent event) throws Exception;
+    Employee getEmployee(String employeeId) throws EntityNotFoundException;
 
-    Employee sendEventKafka(String employeeId, EmployeeEvent event) throws Exception;
-
-    Employee getEmployee(String employeeId) throws Exception;
+    Employee sendEvent(String employeeId, EmployeeEvent event) throws EntityNotFoundException;
 }
