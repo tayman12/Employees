@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v1/employees", consumes = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/api/v1/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    @PostMapping
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE})
     public Employee create(@RequestBody @Validated Employee employee) {
         return employeeService.create(employee);
     }
@@ -26,7 +26,7 @@ public class EmployeeController {
         return employeeService.getEmployee(id);
     }
 
-    @PostMapping("/{id}/state-event")
+    @PostMapping(value = "/{id}/state-event", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public Employee sendEvent(@PathVariable String id, @RequestBody @Validated EmployeeEventDTO eventDTO) throws EntityNotFoundException {
         return employeeService.sendEvent(id, eventDTO.getEvent());
     }
