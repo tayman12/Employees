@@ -1,10 +1,10 @@
 package com.workmotion.employees.listeners;
 
 import com.workmotion.employees.dto.KafkaEmployeeEvent;
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
-import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.wrappers.EmployeeStateMachineWrapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

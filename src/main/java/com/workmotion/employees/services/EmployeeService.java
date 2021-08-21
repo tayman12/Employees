@@ -1,8 +1,8 @@
 package com.workmotion.employees.services;
 
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
-import com.workmotion.employees.exceptions.EntityNotFoundException;
 
 public interface EmployeeService {
 

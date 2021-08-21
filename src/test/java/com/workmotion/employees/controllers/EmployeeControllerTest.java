@@ -119,7 +119,7 @@ class EmployeeControllerTest {
 
         employeeController.sendEvent(savedEmployee.getId(), new EmployeeEventDTO(EmployeeEvent.CHECK));
 
-        Thread.sleep(2000);
+        Thread.sleep(4000);
 
         Employee updatedEmployee = employeeRepository.findById(savedEmployee.getId()).get();
 

@@ -1,10 +1,10 @@
 package com.workmotion.employees.wrappers;
 
+import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.listeners.EmployeeStateChangeInterceptor;
 import com.workmotion.employees.models.Employee;
 import com.workmotion.employees.models.EmployeeEvent;
 import com.workmotion.employees.models.EmployeeState;
-import com.workmotion.employees.exceptions.EntityNotFoundException;
 import com.workmotion.employees.repositories.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+//TODO: add tests
 @Component
 @RequiredArgsConstructor
 public class EmployeeStateMachineWrapper {
@@ -28,7 +29,7 @@ public class EmployeeStateMachineWrapper {
     private final StateMachineFactory<EmployeeState, EmployeeEvent> stateMachineFactory;
     private final EmployeeStateChangeInterceptor employeeStateChangeInterceptor;
 
-    //TODO: check if there is a new/better way to do this
+    //TODO: check what is the new way to do this instead of deprecated methods
     public StateMachine<EmployeeState, EmployeeEvent> build(String employeeId) throws EntityNotFoundException {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
 

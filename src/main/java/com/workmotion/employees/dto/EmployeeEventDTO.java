@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class EmployeeEventDTO {
 
-    //TODO: test constraints
     @NotNull
     EmployeeEvent event;
 }
