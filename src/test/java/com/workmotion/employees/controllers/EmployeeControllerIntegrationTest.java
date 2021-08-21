@@ -156,7 +156,7 @@ public class EmployeeControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(openApi().isValid("employees.yaml"));
 
-        Thread.sleep(2000);
+        Thread.sleep(500);
 
         employee.setState(EmployeeState.IN_CHECK);
 

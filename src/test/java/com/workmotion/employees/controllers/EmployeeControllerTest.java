@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -24,6 +25,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@DirtiesContext
 class EmployeeControllerTest {
 
     @Autowired
@@ -113,13 +115,13 @@ class EmployeeControllerTest {
     //TODO: search how to test kafka events
     @Test
     void sendEventSendsTheEventAndMakeTheStatusTransition() throws InterruptedException, EntityNotFoundException {
-        Employee employee = Employee.builder().staffId("456").firstName("Tocka").lastName("Ayman").age(9).mobileNo("01128821968").build();
+        Employee employee = Employee.builder().id("123").staffId("456").firstName("Tocka").lastName("Ayman").age(9).mobileNo("01128821968").build();
 
         Employee savedEmployee = employeeController.create(employee);
 
         employeeController.sendEvent(savedEmployee.getId(), new EmployeeEventDTO(EmployeeEvent.CHECK));
 
-        Thread.sleep(4000);
+        Thread.sleep(500);
 
         Employee updatedEmployee = employeeRepository.findById(savedEmployee.getId()).get();
 
