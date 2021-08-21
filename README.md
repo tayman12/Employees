@@ -8,11 +8,12 @@ Postman collection of endpoints implemented in this repo is in [Employees.postma
 # Review Concerns and production readiness criteria (The second part)
 - Complete error handling
 - Technologies are used in the right place 
-- There is no over engineering 
-- Testing coverage is high while testing each functionality is in the lowest possible layer in the used testing layers  
+- Code architecture has no over engineering 
 - Coding practices are followed, ex: single responsibility, naming conventions, etc
 - Code is clean, easy, readable and understood without talking with the one who wrote it
 - There are no huge methods or classes
+- Testing coverage is high while testing each functionality is in the lowest possible layer in the used testing layers
+- All tests should be green
 
 # Integration with other services (The third part)
 Employees service should not care about what others are going to do with the data received from it as long as they are authorized to receive it.
