@@ -10,5 +10,5 @@ public interface EmployeeService {
 
     Employee getEmployee(String employeeId) throws EntityNotFoundException;
 
-    Employee sendEvent(String employeeId, EmployeeEvent event) throws EntityNotFoundException;
+    void sendEvent(String employeeId, EmployeeEvent event) throws EntityNotFoundException;
 }

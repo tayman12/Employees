@@ -43,9 +43,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.findById(employeeId).get();
     }
 
-    //TODO: what should be returned here
     @Override
-    public Employee sendEvent(String employeeId, EmployeeEvent event) throws EntityNotFoundException {
+    public void sendEvent(String employeeId, EmployeeEvent event) throws EntityNotFoundException {
         new EmployeeShouldExistByIdValidator(employeeId, employeeRepository).validate();
 
         KafkaEmployeeEvent kafkaEmployeeEvent = new KafkaEmployeeEvent(event, employeeId);
@@ -63,7 +62,5 @@ public class EmployeeServiceImpl implements EmployeeService {
                 log.debug("Unable to send message=[" + kafkaEmployeeEvent + "] due to : " + ex.getMessage());
             }
         });
-
-        return employeeRepository.findById(employeeId).get();
     }
 }

@@ -150,18 +150,11 @@ public class EmployeeControllerIntegrationTest {
 
         EmployeeEventDTO employeeEventDTO = new EmployeeEventDTO(EmployeeEvent.CHECK);
 
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/employees/789/state-event")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/employees/789/state-event")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(employeeEventDTO)))
                 .andExpect(status().isOk())
-                .andExpect(openApi().isValid("employees.yaml"))
-                .andReturn();
-
-        String content = result.getResponse().getContentAsString();
-
-        Employee responseEmployee = objectMapper.readValue(content, Employee.class);
-
-        validateEmployee(employee, responseEmployee);
+                .andExpect(openApi().isValid("employees.yaml"));
 
         Thread.sleep(2000);
 

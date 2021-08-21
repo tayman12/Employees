@@ -27,7 +27,7 @@ public class EmployeeController {
     }
 
     @PostMapping(value = "/{id}/state-event", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public Employee sendEvent(@PathVariable String id, @RequestBody @Validated EmployeeEventDTO eventDTO) throws EntityNotFoundException {
-        return employeeService.sendEvent(id, eventDTO.getEvent());
+    public void sendEvent(@PathVariable String id, @RequestBody @Validated EmployeeEventDTO eventDTO) throws EntityNotFoundException {
+        employeeService.sendEvent(id, eventDTO.getEvent());
     }
 }

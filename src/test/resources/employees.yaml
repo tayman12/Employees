@@ -28,8 +28,6 @@ paths:
                 $ref: "#/components/schemas/EmployeeCreationResponse"
         '400':
           $ref: '#/components/responses/errorResponse'
-        '500':
-          $ref: '#/components/responses/errorResponse'
 
   /api/v1/employees/{id}:
     get:
@@ -46,9 +44,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GettingEmployeeResponse"
-        '400':
-          $ref: '#/components/responses/errorResponse'
-        '500':
+        '404':
           $ref: '#/components/responses/errorResponse'
 
   /api/v1/employees/{id}/state-event:
@@ -68,13 +64,7 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EmployeeStateEventResponse"
-        '400':
-          $ref: '#/components/responses/errorResponse'
-        '500':
+        '404':
           $ref: '#/components/responses/errorResponse'
 
 components:
@@ -186,41 +176,6 @@ components:
       required:
         - event
 
-    EmployeeStateEventResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          example: "123"
-        staffId:
-          type: string
-          example: "123"
-        firstName:
-          type: string
-          example: "Tocka"
-        lastName:
-          type: string
-          example: "Ayman"
-        mobileNo:
-          type: string
-          example: "01128821968"
-        age:
-          type: integer
-          format: int32
-          example: 10
-          minimum: 1
-          maximum: 120
-        state:
-          $ref: "#/components/schemas/EmployeeState"
-      required:
-        - id
-        - staffId
-        - firstName
-        - lastName
-        - mobileNo
-        - age
-        - state
-
     EmployeeState:
       type: string
       enum:
@@ -246,11 +201,12 @@ components:
         message:
           type: string
           description: Error message
+          example: "Entity not found"
         errors:
           type: array
           items:
             type: string
-            example: "Entity not found"
+            example: "Employee with id 123 is not found"
         timestamp:
           type: string
           format: date-time
